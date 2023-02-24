@@ -1,0 +1,48 @@
+version: '3'
+services:
+  opensearch-us-east-1:
+    image: opensearchproject/opensearch:2.1.0
+    container_name: opensearch-us-east-1
+    environment:
+      - cluster.name=opensearch-us-east-1
+      - discovery.type=single-node
+      - bootstrap.memory_lock=true # along with the memlock settings below, disables swapping
+      - "OPENSEARCH_JAVA_OPTS=-Xms512m -Xmx512m" # minimum and maximum Java heap size, recommend setting both to 50% of system RAM
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    volumes:
+      - opensearch-us-east-1:/usr/share/opensearch/data
+    ports:
+      - 9200:9200
+      - 9600:9600 # required for Performance Analyzer
+    networks:
+      - opensearch-net
+
+  opensearch-us-west-2:
+    image: opensearchproject/opensearch:2.1.0
+    container_name: opensearch-us-west-2
+    environment:
+      - cluster.name=opensearch-us-west-2
+      - discovery.type=single-node
+      - bootstrap.memory_lock=true # along with the memlock settings below, disables swapping
+      - "OPENSEARCH_JAVA_OPTS=-Xms512m -Xmx512m" # minimum and maximum Java heap size, recommend setting both to 50% of system RAM
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    volumes:
+      - opensearch-us-west-2:/usr/share/opensearch/data
+    ports:
+      - 9250:9200
+      - 9700:9600 # required for Performance Analyzer
+    networks:
+      - opensearch-net
+
+volumes:
+  opensearch-us-east-1:
+  opensearch-us-west-2:
+
+networks:
+  opensearch-net:
