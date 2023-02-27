@@ -24,8 +24,10 @@ done
 
 echo "adding documents to both subregions"
 
-curl -s -XPUT -k -H 'Content-Type: application/json' -u 'admin:admin' 'https://localhost:9200/payments-2022/_doc/1' -d '{"desc":"pay1", "subregion": "us-east-1"}'
-curl -s -XPUT -k -H 'Content-Type: application/json' -u 'admin:admin' 'https://localhost:9250/payments-2022/_doc/1' -d '{"desc":"pay2", "subregion": "us-west-2"}'
+for ((i=1;i < 11; i ++)); do
+curl -s -XPUT -k -H 'Content-Type: application/json' -u 'admin:admin' "https://localhost:9200/payments-2022/_doc/$i" -d '{"desc":"pay'"$i"'", "value": '"$i"', "subregion": "us-east-1"}'
+curl -s -XPUT -k -H 'Content-Type: application/json' -u 'admin:admin' "https://localhost:9250/payments-2022/_doc/$i" -d '{"desc":"pay'"$i"'", "value": '"$i"', "subregion": "us-west-2"}'
+done
 
 echo
 echo "configuring subregions on both sides"
@@ -52,7 +54,28 @@ echo
 echo "searching documents from both sides"
 
 for p in 9200 9250; do
-curl -s -XGET -k -u 'admin:admin' "https://localhost:${p}/subregion-*:payments/_search?pretty"
+curl -s -XGET -k -u 'admin:admin' -H "Content-Type: application/json" "https://localhost:${p}/subregion-*:payments/_search?pretty" -d '
+{
+  "query": {
+    "match_all": {}
+  },
+  "aggs": {
+    "docs_per_subregion": {
+      "terms": {
+        "field": "subregion.keyword",
+        "size": 10
+      },
+       "aggs": {
+        "value-sum": {
+          "sum": {
+            "field": "value"
+          }
+        }
+      }
+    }
+  }
+}
+'
 done
 
 

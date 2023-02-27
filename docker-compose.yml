@@ -1,7 +1,7 @@
 version: '3'
 services:
   opensearch-us-east-1:
-    image: opensearchproject/opensearch:2.1.0
+    image: opensearchproject/opensearch:latest
     container_name: opensearch-us-east-1
     environment:
       - cluster.name=opensearch-us-east-1
@@ -21,7 +21,7 @@ services:
       - opensearch-net
 
   opensearch-us-west-2:
-    image: opensearchproject/opensearch:2.1.0
+    image: opensearchproject/opensearch:latest
     container_name: opensearch-us-west-2
     environment:
       - cluster.name=opensearch-us-west-2
@@ -37,6 +37,19 @@ services:
     ports:
       - 9250:9200
       - 9700:9600 # required for Performance Analyzer
+    networks:
+      - opensearch-net
+
+
+  opensearch-dashboards:
+    image: opensearchproject/opensearch-dashboards:latest
+    container_name: opensearch-dashboards
+    ports:
+      - 5601:5601
+    expose:
+      - "5601"
+    environment:
+      OPENSEARCH_HOSTS: '["https://opensearch-us-east-1:9200"]'
     networks:
       - opensearch-net
 
